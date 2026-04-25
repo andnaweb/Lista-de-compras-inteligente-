@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart List - Anderson</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --accent: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card);
+            padding: 20px;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        h1 { 
+            font-size: 1.75rem; 
+            margin-bottom: 24px; 
+            text-align: center; 
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .summary {
+            background: rgba(99, 102, 241, 0.1);
+            padding: 15px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            text-align: center;
+        }
+
+        .total-label { color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .total-value { display: block; font-size: 1.8rem; font-weight: 800; color: var(--success); margin-top: 5px; }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        input {
+            background: #334155;
+            border: 1px solid #475569;
+            padding: 14px;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            width: 100%;
+        }
+
+        .btn-main {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .actions-secondary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-sec {
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #475569;
+            background: transparent;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .item-list { list-style: none; padding: 0; margin-top: 10px; }
+
+        .item-card {
+            background: rgba(255,255,255,0.02);
+            margin-bottom: 8px;
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid rgba(255,255,255,0.05);
+            gap: 10px;
+        }
+
+        .item-info-row {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 8px;
+            flex-grow: 1;
+            font-size: 0.85rem;
+            overflow: hidden;
+        }
+
+        .item-name { font-weight: 600; min-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-val { color: var(--text-dim); white-space: nowrap; }
+        .item-total { color: var(--success); font-weight: bold; white-space: nowrap; }
+
+        .item-actions { display: flex; gap: 6px; }
+        .icon-btn {
+            background: #334155;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        @media print {
+            .input-group, .actions-secondary, .item-actions, .btn-main { display: none !important; }
+            body { background: white; color: black; padding: 0; }
+            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; background: white; }
+            
+            /* Ajuste para impressão: uma linha embaixo da outra */
+            .item-list { display: block; }
+            .item-card { 
+                border: 0; 
+                border-bottom: 1px solid #eee; 
+                background: white; 
+                color: black; 
+                margin-bottom: 5px;
+                padding: 10px 0;
+            }
+            .item-val, .item-name { color: black; }
+            .item-total { color: black; }
+            h1 { -webkit-text-fill-color: black; color: black; }
+            .summary { border: 1px solid #eee; background: #fafafa; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Smart List 🛒</h1>
+
+    <div class="summary">
+        <span class="total-label">Total Estimado</span>
+        <span class="total-value" id="total-geral">R$ 0,00</span>
+    </div>
+
+    <div class="input-group">
+        <input type="text" id="nome" placeholder="Produto">
+        <input type="number" id="qtd" placeholder="Qtd" min="1">
+        <input type="number" id="preco" placeholder="R$ Unitário" step="0.01">
+        <button id="add-btn" class="btn-main" onclick="adicionarItem()">Adicionar Item</button>
+    </div>
+
+    <div class="actions-secondary">
+        <button class="btn-sec" onclick="salvarLocalStorage()">💾 Salvar</button>
+        <button class="btn-sec" onclick="imprimirLista()">🖨️ Imprimir</button>
+    </div>
+
+    <ul id="lista" class="item-list"></ul>
+</div>
+
+<script>
+    let itens = JSON.parse(localStorage.getItem('minhaLista')) || [];
+    let editIndex = -1;
+
+    renderizar();
+
+    function adicionarItem() {
+        const nome = document.getElementById('nome').value;
+        const qtd = parseFloat(document.getElementById('qtd').value);
+        const preco = parseFloat(document.getElementById('preco').value);
+
+        if (!nome || isNaN(qtd) || isNaN(preco)) {
+            alert("Preencha todos os campos!");
+            return;
+        }
+
+        const subtotal = qtd * preco;
+
+        if (editIndex > -1) {
+            itens[editIndex] = { nome, qtd, preco, subtotal };
+            editIndex = -1;
+            document.getElementById('add-btn').innerText = "Adicionar Item";
+            document.getElementById('add-btn').style.background = "#6366f1";
+        } else {
+            itens.push({ nome, qtd, preco, subtotal });
+        }
+
+        limparCampos();
+        renderizar();
+    }
+
+    function renderizar() {
+        const listaElement = document.getElementById('lista');
+        const totalGeralElement = document.getElementById('total-geral');
+        listaElement.innerHTML = '';
+        
+        let total = 0;
+
+        itens.forEach((item, index) => {
+            total += item.subtotal;
+            listaElement.innerHTML += `
+                <li class="item-card">
+                    <div class="item-info-row">
+                        <span class="item-name">${item.nome}</span>
+                        <span class="item-val">${item.qtd}x</span>
+                        <span class="item-val">R$${item.preco.toFixed(2)}</span>
+                        <span class="item-total">R$${item.subtotal.toFixed(2)}</span>
+                    </div>
+                    <div class="item-actions">
+                        <button class="icon-btn" onclick="editar(${index})">✏️</button>
+                        <button class="icon-btn" onclick="remover(${index})">🗑️</button>
+                    </div>
+                </li>
+            `;
+        });
+
+        totalGeralElement.innerText = `R$ ${total.toFixed(2)}`;
+    }
+
+    function remover(index) {
+        if(confirm("Remover item?")) {
+            itens.splice(index, 1);
+            renderizar();
+        }
+    }
+
+    function editar(index) {
+        const item = itens[index];
+        document.getElementById('nome').value = item.nome;
+        document.getElementById('qtd').value = item.qtd;
+        document.getElementById('preco').value = item.preco;
+        
+        editIndex = index;
+        document.getElementById('add-btn').innerText = "Atualizar";
+        document.getElementById('add-btn').style.background = "#10b981";
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    function salvarLocalStorage() {
+        localStorage.setItem('minhaLista', JSON.stringify(itens));
+        alert("Lista salva com sucesso!");
+    }
+
+    function imprimirLista() {
+        window.print();
+    }
+
+    function limparCampos() {
+        document.getElementById('nome').value = '';
+        document.getElementById('qtd').value = '';
+        document.getElementById('preco').value = '';
+        document.getElementById('nome').focus();
+    }
+</script>
+
+</body>
+</html>
