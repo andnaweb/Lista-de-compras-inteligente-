@@ -153,25 +153,17 @@
             font-size: 14px;
         }
 
+        /* CONFIGURAÇÃO PARA A IMPRESSÃO SAIR LIMPA */
         @media print {
+            body { background: white !important; color: black !important; padding: 0 !important; }
+            .container { box-shadow: none !important; border: none !important; width: 100% !important; max-width: 100% !important; background: white !important; }
             .input-group, .actions-secondary, .item-actions, .btn-main { display: none !important; }
-            body { background: white; color: black; padding: 0; }
-            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; background: white; }
-            
-            /* Ajuste para impressão: uma linha embaixo da outra */
-            .item-list { display: block; }
-            .item-card { 
-                border: 0; 
-                border-bottom: 1px solid #eee; 
-                background: white; 
-                color: black; 
-                margin-bottom: 5px;
-                padding: 10px 0;
-            }
-            .item-val, .item-name { color: black; }
-            .item-total { color: black; }
-            h1 { -webkit-text-fill-color: black; color: black; }
-            .summary { border: 1px solid #eee; background: #fafafa; }
+            .item-card { border: none !important; border-bottom: 1px solid #000 !important; color: black !important; padding: 10px 0 !important; }
+            .item-info-row { display: flex !important; font-size: 14pt !important; color: black !important; }
+            .item-name, .item-val, .item-total { color: black !important; }
+            h1 { -webkit-text-fill-color: black !important; color: black !important; }
+            .summary { border: 1px solid #000 !important; background: #fff !important; }
+            .total-value { color: black !important; }
         }
     </style>
 </head>
@@ -205,6 +197,17 @@
     let editIndex = -1;
 
     renderizar();
+
+    // ESTA É A FUNÇÃO QUE CONECTA COM O KODULAR
+    function imprimirLista() {
+        // Tenta imprimir (funciona se for no navegador)
+        window.print();
+        
+        // Avisa o Kodular que o botão foi clicado (necessário para o APK)
+        if (window.AppInventor) {
+            window.AppInventor.setWebViewString("imprimir");
+        }
+    }
 
     function adicionarItem() {
         const nome = document.getElementById('nome').value;
@@ -283,10 +286,6 @@
         alert("Lista salva com sucesso!");
     }
 
-    function imprimirLista() {
-        window.print();
-    }
-
     function limparCampos() {
         document.getElementById('nome').value = '';
         document.getElementById('qtd').value = '';
@@ -297,3 +296,4 @@
 
 </body>
 </html>
+
