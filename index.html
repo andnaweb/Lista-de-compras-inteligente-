@@ -153,13 +153,13 @@
             font-size: 14px;
         }
 
-        /* CONFIGURAÇÃO PARA A IMPRESSÃO SAIR LIMPA */
+        /* CONFIGURAÇÃO PARA IMPRESSÃO LIMPA */
         @media print {
             body { background: white !important; color: black !important; padding: 0 !important; }
             .container { box-shadow: none !important; border: none !important; width: 100% !important; max-width: 100% !important; background: white !important; }
             .input-group, .actions-secondary, .item-actions, .btn-main { display: none !important; }
-            .item-card { border: none !important; border-bottom: 1px solid #000 !important; color: black !important; padding: 10px 0 !important; }
-            .item-info-row { display: flex !important; font-size: 14pt !important; color: black !important; }
+            .item-card { border: none !important; border-bottom: 1px solid #000 !important; color: black !important; padding: 10px 0 !important; display: flex !important; justify-content: space-between !important; }
+            .item-info-row { display: flex !important; width: 100% !important; justify-content: space-between !important; font-size: 12pt !important; }
             .item-name, .item-val, .item-total { color: black !important; }
             h1 { -webkit-text-fill-color: black !important; color: black !important; }
             .summary { border: 1px solid #000 !important; background: #fff !important; }
@@ -198,14 +198,17 @@
 
     renderizar();
 
-    // ESTA É A FUNÇÃO QUE CONECTA COM O KODULAR
+    // FUNÇÃO QUE RESOLVE O PROBLEMA DO BOTAO ESTÁTICO NO APK
     function imprimirLista() {
-        // Tenta imprimir (funciona se for no navegador)
-        window.print();
-        
-        // Avisa o Kodular que o botão foi clicado (necessário para o APK)
-        if (window.AppInventor) {
-            window.AppInventor.setWebViewString("imprimir");
+        try {
+            // Se estiver no APK do Kodular, o código abaixo dispara a função de fechar/imprimir do sistema
+            if (window.AppInventor && window.AppInventor.setWebViewString) {
+                window.AppInventor.setWebViewString("print");
+            }
+            // Comando padrão para navegadores comuns
+            window.print();
+        } catch (e) {
+            console.log("Erro ao tentar imprimir.");
         }
     }
 
@@ -213,14 +216,8 @@
         const nome = document.getElementById('nome').value;
         const qtd = parseFloat(document.getElementById('qtd').value);
         const preco = parseFloat(document.getElementById('preco').value);
-
-        if (!nome || isNaN(qtd) || isNaN(preco)) {
-            alert("Preencha todos os campos!");
-            return;
-        }
-
+        if (!nome || isNaN(qtd) || isNaN(preco)) { alert("Preencha todos os campos!"); return; }
         const subtotal = qtd * preco;
-
         if (editIndex > -1) {
             itens[editIndex] = { nome, qtd, preco, subtotal };
             editIndex = -1;
@@ -229,7 +226,6 @@
         } else {
             itens.push({ nome, qtd, preco, subtotal });
         }
-
         limparCampos();
         renderizar();
     }
@@ -238,9 +234,7 @@
         const listaElement = document.getElementById('lista');
         const totalGeralElement = document.getElementById('total-geral');
         listaElement.innerHTML = '';
-        
         let total = 0;
-
         itens.forEach((item, index) => {
             total += item.subtotal;
             listaElement.innerHTML += `
@@ -258,7 +252,6 @@
                 </li>
             `;
         });
-
         totalGeralElement.innerText = `R$ ${total.toFixed(2)}`;
     }
 
@@ -274,7 +267,6 @@
         document.getElementById('nome').value = item.nome;
         document.getElementById('qtd').value = item.qtd;
         document.getElementById('preco').value = item.preco;
-        
         editIndex = index;
         document.getElementById('add-btn').innerText = "Atualizar";
         document.getElementById('add-btn').style.background = "#10b981";
@@ -296,4 +288,3 @@
 
 </body>
 </html>
-
